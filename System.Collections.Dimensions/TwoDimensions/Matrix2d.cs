@@ -393,7 +393,7 @@ namespace System.Collections.Dimensions.TwoDimensions
 
         public IEnumerator<Intersection2d<T>> GetEnumerator()
         {
-            throw new NotImplementedException();
+            return new Enumerator(this);
         }
 
         public Index2d IndexOf(T intem)
@@ -470,12 +470,12 @@ namespace System.Collections.Dimensions.TwoDimensions
 
         IEnumerator<IIntersectionXd<T>> IEnumerable<IIntersectionXd<T>>.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return new Enumerator(this);
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            throw new NotImplementedException();
+            return new Enumerator(this);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -649,5 +649,93 @@ namespace System.Collections.Dimensions.TwoDimensions
         private T[] InputAsArray(IEnumerable<T> items) => items is T[] a ? a : items.ToArray();
 
         private IList<T> InputAsList(IEnumerable<T> items) => items is IList<T> l ? l : items.ToArray();
+
+        [Serializable]
+        public struct Enumerator : IEnumerator<Intersection2d<T>>, IEnumerator<T>, IEnumerator<IIntersectionXd<T>>, IEnumerator
+        {
+            private Intersection2d<T> _current;
+            private Matrix2d<T> _matrix;
+            private int _version;
+            private int _x;
+            private int _y;
+
+            internal Enumerator(Matrix2d<T> matrix)
+            {
+                _matrix = matrix;
+                _x = 0;
+                _y = 0;
+                _version = matrix._version;
+                _current = default;
+            }
+
+            public Intersection2d<T> Current => _current;
+
+            Object IEnumerator.Current
+            {
+                get
+                {
+                    //todo: check why it is like this in list class
+                    //if (x == 0 || x == matrix._size + 1)
+                    //{
+                    //    ThrowHelper.ThrowInvalidOperationException(ExceptionResource.InvalidOperation_EnumOpCantHappen);
+                    //}
+                    return Current;
+                }
+            }
+
+            T IEnumerator<T>.Current => _current.Value;
+
+            IIntersectionXd<T> IEnumerator<IIntersectionXd<T>>.Current => Current;
+
+            public void Dispose()
+            {
+            }
+
+            public bool MoveNext()
+            {
+                Matrix2d<T> matrix = _matrix;
+
+                if (_version == matrix._version && (uint)_x < (uint)matrix._countX)
+                {
+                    if ((uint)_y == (uint)matrix._countY)
+                    {
+                        _y = 0;
+                        _x++;
+                        if ((uint)_x == (uint)matrix._countX)
+                            return MoveNextRare();
+                    }
+                    _current = new Intersection2d<T>(_x, _y, matrix._items[_x, _y]);
+                    _y++;
+                    return true;
+                }
+                return MoveNextRare();
+            }
+
+            void IEnumerator.Reset()
+            {
+                if (_version != _matrix._version)
+                {
+                    throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+                }
+
+                _x = 0;
+                _y = 0;
+                _current = default;
+            }
+
+            private bool MoveNextRare()
+            {
+                if (_version != _matrix._version)
+                {
+                    throw new InvalidOperationException("Collection was modified; enumeration operation may not execute.");
+                }
+
+                // the same in list, but know why
+                _x = _matrix._countX + 1;
+                _y = _matrix._countY + 1;
+                _current = default;
+                return false;
+            }
+        }
     }
 }

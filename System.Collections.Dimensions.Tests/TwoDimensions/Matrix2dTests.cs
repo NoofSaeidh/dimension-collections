@@ -17,17 +17,35 @@ namespace System.Collections.Dimensions.Tests.TwoDimensions
     {
         private const int _defaultCapacity = 4;
 
-        private Matrix2d<object> DefaultMatrix() => new Matrix2d<object>(_defaultCapacity, _defaultCapacity);
+        private static readonly Intersection2d<string>[] _defaultStringIntersections;
 
-        private Matrix2d<object> DefaultMatrix(int x, int y) => new Matrix2d<object>(x, y);
+        private static readonly string[] _defaultStringValues;
 
-        private Matrix2d<string> DefaultNotEmptyStringMatrix() => new Matrix2d<string>((4, 4), new string[]
+        static Matrix2dTests()
         {
-            "a", "b", "c", "d",
-            "e", "f", "g", "h",
-            "i", "j", "k", "l",
-            "m", "n", "o", "p"
-        });
+            _defaultStringValues = new string[]
+            {
+                "a", "b", "c", "d",
+                "e", "f", "g", "h",
+                "i", "j", "k", "l",
+                "m", "n", "o", "p"
+            };
+
+            _defaultStringIntersections = _defaultStringValues
+                .Select((e, i) => new Intersection2d<string>(i / 4, i % 4, e)).ToArray();
+
+            //AssertionOptions.AssertEquivalencyUsing(o =>
+            //    o.ComparingByValue<Intersection2d<object>>()
+            //     .ComparingByValue<Intersection2d<string>>()
+            //     .ComparingByValue<Intersection2d<int>>()
+            //);
+        }
+
+        private static Matrix2d<object> DefaultMatrix() => new Matrix2d<object>(_defaultCapacity, _defaultCapacity);
+
+        private static Matrix2d<object> DefaultMatrix(int x, int y) => new Matrix2d<object>(x, y);
+
+        private static Matrix2d<string> DefaultNotEmptyStringMatrix() => new Matrix2d<string>((4, 4), _defaultStringValues);
 
         #region Capacities
 
@@ -183,5 +201,21 @@ namespace System.Collections.Dimensions.Tests.TwoDimensions
         }
 
         #endregion Indexer
+
+        #region Enumerations
+
+        [Trait("Member", "Enumerator")]
+        [Trait("Method", nameof(Matrix2d<object>.GetEnumerator))]
+        [Fact]
+        public void Enumerator_Default_WorksRight()
+        {
+            IEnumerable<Intersection2d<string>> matrix = DefaultNotEmptyStringMatrix();
+
+            matrix.Should().HaveCount(16);
+            //todo: all is ok but assertion doesn't work
+            matrix.Should().BeEquivalentTo(_defaultStringIntersections, o => o.ComparingByValue<Intersection2d<string>>());
+        }
+
+        #endregion Enumerations
     }
 }
