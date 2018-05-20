@@ -17,6 +17,7 @@ namespace System.Collections.Dimensions.TwoDimensions
             Y = y;
         }
 
+        public int Dimensions => 2;
         public int X { get; }
         public int Y { get; }
 
@@ -38,7 +39,7 @@ namespace System.Collections.Dimensions.TwoDimensions
             }
         }
 
-        public int Dimensions => 2;
+        public static implicit operator Index2d((int x, int y) tuple) => new Index2d(tuple.x, tuple.y);
 
         public override string ToString() => $"{X}, {Y}";
     }

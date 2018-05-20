@@ -16,8 +16,6 @@ namespace System.Collections.Dimensions.TwoDimensions
         // from mscorlib Array
         internal const int MaxArrayLength = 0X7FEFFFFF;
 
-        internal const int MaxByteArra_capacityY = 0x7FFFFFC7;
-
         private const int _defaultCapacity = 4;
 
         private static readonly T[,] _emptyArray = new T[0, 0];
@@ -46,6 +44,9 @@ namespace System.Collections.Dimensions.TwoDimensions
 
         public Matrix2d(int capacityX, int capacityY)
         {
+            if (capacityX < 0 || capacityY < 0)
+                throw new ArgumentOutOfRangeException();
+
             _items = new T[capacityX, capacityY];
             _capacityX = capacityX;
             _capacityY = capacityY;
@@ -55,9 +56,24 @@ namespace System.Collections.Dimensions.TwoDimensions
         {
         }
 
-        public Matrix2d(IEnumerable<T> collection, Index2d counts)
+        public Matrix2d(Index2d counts, IEnumerable<T> items)
         {
-            throw new NotImplementedException();
+            if (items == null)
+                throw new ArgumentNullException(nameof(items));
+            if (counts.X < 0 || counts.Y < 0)
+                throw new ArgumentOutOfRangeException();
+            var array = InputAsArray(items);
+            if (array.Length == 0)
+            {
+                _items = _emptyArray;
+                return;
+            }
+            if (array.Length > counts.X * counts.Y)
+                throw new ArgumentException();
+            _items = new T[counts.X, counts.Y];
+            _countX = _capacityX = counts.X;
+            _countY = _capacityY = counts.Y;
+            CopyArrayToItems(array);
         }
 
         private enum SizeAction
@@ -138,7 +154,7 @@ namespace System.Collections.Dimensions.TwoDimensions
                 {
                     if (value > 0)
                     {
-                        T[,] newItems = new T[value, _countY];
+                        T[,] newItems = new T[value, _capacityY];
                         if (_countTotal > 0)
                         {
                             Array.Copy(_items, 0, newItems, 0, _countTotal);
@@ -173,7 +189,7 @@ namespace System.Collections.Dimensions.TwoDimensions
                 {
                     if (value > 0)
                     {
-                        T[,] newItems = new T[_countX, value];
+                        T[,] newItems = new T[_capacityX, value];
                         if (_countTotal > 0)
                         {
                             Array.Copy(_items, 0, newItems, 0, _countTotal);
@@ -536,6 +552,18 @@ namespace System.Collections.Dimensions.TwoDimensions
             return CheckSizes(value, _countY);
         }
 
+        private void CopyArrayToItems(T[] input)
+        {
+            // hack to copy multidim array
+            for (int i = 0, k = 0; i < _countX; i++)
+            {
+                for (int j = 0; j < _countY; j++, k++)
+                {
+                    _items[i, j] = input[k];
+                }
+            }
+        }
+
         private void EnsureCapacities(Index2d min)
         {
             if (_capacityX < min.X || _capacityY < min.Y)
@@ -592,7 +620,7 @@ namespace System.Collections.Dimensions.TwoDimensions
 
         private IList<T> EnsureListSizes(IEnumerable<T> items, int size, out int newSize)
         {
-            var list = items is IList<T> l ? l : items.ToArray();
+            var list = InputAsList(items);
             var action = CheckSizes(list.Count, size);
             switch (action)
             {
@@ -617,5 +645,9 @@ namespace System.Collections.Dimensions.TwoDimensions
                     return null;
             }
         }
+
+        private T[] InputAsArray(IEnumerable<T> items) => items is T[] a ? a : items.ToArray();
+
+        private IList<T> InputAsList(IEnumerable<T> items) => items is IList<T> l ? l : items.ToArray();
     }
 }
