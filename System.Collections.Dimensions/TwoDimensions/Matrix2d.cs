@@ -26,13 +26,13 @@ namespace System.Collections.Dimensions.TwoDimensions
 
         private int _capacityY;
 
-        private T[,] _items;
-
         private int _countTotal;
 
         private int _countX;
 
         private int _countY;
+
+        private T[,] _items;
 
         [NonSerialized]
         private object _syncRoot;
@@ -47,6 +47,8 @@ namespace System.Collections.Dimensions.TwoDimensions
         public Matrix2d(int capacityX, int capacityY)
         {
             _items = new T[capacityX, capacityY];
+            _capacityX = capacityX;
+            _capacityY = capacityY;
         }
 
         public Matrix2d(Index2d capacities) : this(capacities.X, capacities.Y)
@@ -188,14 +190,6 @@ namespace System.Collections.Dimensions.TwoDimensions
             }
         }
 
-        public int Count => _countTotal;
-
-        public Index2d Counts => new Index2d(CountX, CountY);
-
-        IIndexXd IReadOnlyCollectionXd<T>.Counts => Counts;
-
-        IIndexXd ICollectionXd<T>.Counts => Counts;
-
         public int CountX
         {
             get
@@ -225,6 +219,14 @@ namespace System.Collections.Dimensions.TwoDimensions
         public int Dimensions => 2;
 
         public bool IsFixedSize => false;
+
+        public int Count => _countTotal;
+
+        public Index2d Counts => new Index2d(CountX, CountY);
+
+        IIndexXd IReadOnlyCollectionXd<T>.Counts => Counts;
+
+        IIndexXd ICollectionXd<T>.Counts => Counts;
 
         //todo: sync
         bool ICollectionXd<T>.IsReadOnly => false;
@@ -290,23 +292,6 @@ namespace System.Collections.Dimensions.TwoDimensions
         }
 
         T IReadOnlyMatrixXd<T>.this[IIndexXd index] => ((IMatrixXd<T>)this)[index];
-
-        void ICollectionXd<T>.Add(IEnumerable<T> items, int dimension)
-        {
-            switch (dimension)
-            {
-                case 0:
-                    AddX(items);
-                    return;
-
-                case 1:
-                    AddY(items);
-                    return;
-
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
 
         public void AddX(IEnumerable<T> items)
         {
@@ -395,24 +380,7 @@ namespace System.Collections.Dimensions.TwoDimensions
             throw new NotImplementedException();
         }
 
-        IEnumerator<IIntersectionXd<T>> IEnumerable<IIntersectionXd<T>>.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
         public Index2d IndexOf(T intem)
-        {
-            throw new NotImplementedException();
-        }
-
-        IIndexXd IMatrixXd<T>.IndexOf(T item)
         {
             throw new NotImplementedException();
         }
@@ -432,11 +400,6 @@ namespace System.Collections.Dimensions.TwoDimensions
             throw new NotImplementedException();
         }
 
-        void IMatrixXd<T>.Insert(IIndexXd index, T item)
-        {
-            throw new NotImplementedException();
-        }
-
         public void InsertX(int x, T item)
         {
             throw new NotImplementedException();
@@ -447,17 +410,7 @@ namespace System.Collections.Dimensions.TwoDimensions
             throw new NotImplementedException();
         }
 
-        bool ICollectionXd<T>.Remove(IEnumerable<T> items, int dimension)
-        {
-            throw new NotImplementedException();
-        }
-
         public void RemoveAt(IIndexXd index, int dimension)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IMatrixXd<T>.RemoveAt(IIndexXd index, int dimension)
         {
             throw new NotImplementedException();
         }
@@ -478,6 +431,55 @@ namespace System.Collections.Dimensions.TwoDimensions
         }
 
         public bool RemoveY(IEnumerable<T> items)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ICollectionXd<T>.Add(IEnumerable<T> items, int dimension)
+        {
+            switch (dimension)
+            {
+                case 0:
+                    AddX(items);
+                    return;
+
+                case 1:
+                    AddY(items);
+                    return;
+
+                default:
+                    throw new InvalidOperationException();
+            }
+        }
+
+        IEnumerator<IIntersectionXd<T>> IEnumerable<IIntersectionXd<T>>.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        IIndexXd IMatrixXd<T>.IndexOf(T item)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IMatrixXd<T>.Insert(IIndexXd index, T item)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool ICollectionXd<T>.Remove(IEnumerable<T> items, int dimension)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IMatrixXd<T>.RemoveAt(IIndexXd index, int dimension)
         {
             throw new NotImplementedException();
         }
