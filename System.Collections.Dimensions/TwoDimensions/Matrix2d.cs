@@ -76,15 +76,6 @@ namespace System.Collections.Dimensions.TwoDimensions
             CopyArrayToItems(array);
         }
 
-        private enum SizeAction
-        {
-            Nothing,
-            Return,
-            Throw,
-            ExtendItems,
-            ExtendInput
-        }
-
         // throw, skip or add default if new collection that added
         // has less values that curretn dimension
         public DimensionChangeBehavior AddingFewerItemsBehavior { get; set; }
@@ -468,19 +459,6 @@ namespace System.Collections.Dimensions.TwoDimensions
             }
         }
 
-        /* todo: return interfaces and write custom linq */
-        /*
-        IEnumerator<IIntersectionXd<T>> IEnumerable<IIntersectionXd<T>>.GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-        */
-
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         IIndexXd IMatrixXd<T>.IndexOf(T item)
@@ -653,10 +631,32 @@ namespace System.Collections.Dimensions.TwoDimensions
 
         private IList<T> InputAsList(IEnumerable<T> items) => items is IList<T> l ? l : items.ToArray();
 
+        private enum SizeAction
+        {
+            Nothing,
+            Return,
+            Throw,
+            ExtendItems,
+            ExtendInput
+        }
+
+        /* todo: return interfaces and write custom linq */
+        /*
+        IEnumerator<IIntersectionXd<T>> IEnumerable<IIntersectionXd<T>>.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
+            return new Enumerator(this);
+        }
+        */
+
         [Serializable]
         public struct Enumerator : IEnumerator<Intersection2d<T>>, IEnumerator<T>, IEnumerator<IIntersectionXd<T>>, IEnumerator
         {
-            private Intersection2d<T> _current;
+            private T _current;
             private Matrix2d<T> _matrix;
             private int _version;
             private int _x;
@@ -666,12 +666,13 @@ namespace System.Collections.Dimensions.TwoDimensions
             {
                 _matrix = matrix;
                 _x = 0;
-                _y = 0;
+                // start from lower indexes to call ctor for Intersection only when Current called
+                _y = -1;
                 _version = matrix._version;
                 _current = default;
             }
 
-            public Intersection2d<T> Current => _current;
+            public Intersection2d<T> Current => new Intersection2d<T>(_x, _y, _current);
 
             Object IEnumerator.Current
             {
@@ -686,7 +687,7 @@ namespace System.Collections.Dimensions.TwoDimensions
                 }
             }
 
-            T IEnumerator<T>.Current => _current.Value;
+            T IEnumerator<T>.Current => _current;
 
             IIntersectionXd<T> IEnumerator<IIntersectionXd<T>>.Current => Current;
 
@@ -700,15 +701,15 @@ namespace System.Collections.Dimensions.TwoDimensions
 
                 if (_version == matrix._version && (uint)_x < (uint)matrix._countX)
                 {
-                    if ((uint)_y == (uint)matrix._countY)
+                    if ((uint)_y == (uint)matrix._countY - 1)
                     {
-                        _y = 0;
+                        _y = -1;
                         _x++;
                         if ((uint)_x == (uint)matrix._countX)
                             return MoveNextRare();
                     }
-                    _current = new Intersection2d<T>(_x, _y, matrix._items[_x, _y]);
                     _y++;
+                    _current = matrix._items[_x, _y];
                     return true;
                 }
                 return MoveNextRare();
@@ -722,7 +723,7 @@ namespace System.Collections.Dimensions.TwoDimensions
                 }
 
                 _x = 0;
-                _y = 0;
+                _y = -1;
                 _current = default;
             }
 
