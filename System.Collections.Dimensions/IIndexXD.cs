@@ -11,7 +11,7 @@ namespace System.Collections.Dimensions
 {
     public interface IIndexXd
     {
-        int Dimensions { get; }
+        int Rank { get; }
 
         // get index of specified dimension
         int this[int dimension] { get; }

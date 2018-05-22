@@ -34,11 +34,11 @@ namespace System.Collections.Dimensions.Tests.TwoDimensions
             _defaultStringIntersections = _defaultStringValues
                 .Select((e, i) => new Intersection2d<string>(i / 4, i % 4, e)).ToArray();
 
-            //AssertionOptions.AssertEquivalencyUsing(o =>
-            //    o.ComparingByValue<Intersection2d<object>>()
-            //     .ComparingByValue<Intersection2d<string>>()
-            //     .ComparingByValue<Intersection2d<int>>()
-            //);
+            AssertionOptions.AssertEquivalencyUsing(o =>
+                o.ComparingByValue<Intersection2d<object>>()
+                 .ComparingByValue<Intersection2d<string>>()
+                 .ComparingByValue<Intersection2d<int>>()
+            );
         }
 
         private static Matrix2d<object> DefaultMatrix() => new Matrix2d<object>(_defaultCapacity, _defaultCapacity);
@@ -209,11 +209,12 @@ namespace System.Collections.Dimensions.Tests.TwoDimensions
         [Fact]
         public void Enumerator_Default_WorksRight()
         {
-            IEnumerable<Intersection2d<string>> matrix = DefaultNotEmptyStringMatrix();
+            var matrix = DefaultNotEmptyStringMatrix();
 
-            matrix.Should().HaveCount(16);
-            //todo: all is ok but assertion doesn't work
-            matrix.Should().BeEquivalentTo(_defaultStringIntersections, o => o.ComparingByValue<Intersection2d<string>>());
+            var array = matrix.ToArray();
+
+            array.Should().HaveCount(16);
+            array.ToArray().Should().BeEquivalentTo(_defaultStringIntersections);
         }
 
         #endregion Enumerations
