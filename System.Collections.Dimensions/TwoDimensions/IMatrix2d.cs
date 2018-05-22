@@ -9,7 +9,10 @@ using System.Threading.Tasks;
 
 namespace System.Collections.Dimensions.TwoDimensions
 {
-    public interface IMatrix2d<T> : ICollection2d<T>, IMatrixXd<T>, IEnumerable<Intersection2d<T>>, IEnumerable<T>, IEnumerable
+    // two generic enumerable doesn't allow use linq
+    // todo: need to write custom extensions for linq and return different enumerables interfaces,
+    // especially for base interfaces
+    public interface IMatrix2d<T> : ICollection2d<T>, IMatrixXd<T>, IEnumerable<Intersection2d<T>>, /*IEnumerable<T>,*/ IEnumerable
     {
         T this[int x, int y] { get; set; }
 

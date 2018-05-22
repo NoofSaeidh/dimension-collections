@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace System.Collections.Dimensions
 {
-    public interface IReadOnlyCollectionXd<T> : IEnumerable<T>, IEnumerable
+    public interface IReadOnlyCollectionXd<T> : /*IEnumerable<T>,*/ IEnumerable
     {
         int Count { get; }
         IIndexXd Counts { get; }

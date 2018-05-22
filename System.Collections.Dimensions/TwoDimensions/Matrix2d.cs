@@ -468,6 +468,8 @@ namespace System.Collections.Dimensions.TwoDimensions
             }
         }
 
+        /* todo: return interfaces and write custom linq */
+        /*
         IEnumerator<IIntersectionXd<T>> IEnumerable<IIntersectionXd<T>>.GetEnumerator()
         {
             return new Enumerator(this);
@@ -477,6 +479,7 @@ namespace System.Collections.Dimensions.TwoDimensions
         {
             return new Enumerator(this);
         }
+        */
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 

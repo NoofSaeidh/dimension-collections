@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace System.Collections.Dimensions.TwoDimensions
 {
-    public interface ICollection2d<T> : ICollectionXd<T>, IEnumerable<Intersection2d<T>>, IEnumerable<T>, IEnumerable
+    public interface ICollection2d<T> : ICollectionXd<T>, IEnumerable<Intersection2d<T>>, /*IEnumerable<T>,*/ IEnumerable
     {
         int CountX { get; }
 

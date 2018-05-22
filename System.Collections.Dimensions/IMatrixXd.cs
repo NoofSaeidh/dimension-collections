@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace System.Collections.Dimensions
 {
-    public interface IMatrixXd<T> : ICollectionXd<T>, IEnumerable<IIntersectionXd<T>>, IEnumerable<T>, IEnumerable
+    public interface IMatrixXd<T> : ICollectionXd<T>, /*IEnumerable<IIntersectionXd<T>>, IEnumerable<T>,*/ IEnumerable
     {
         T this[IIndexXd index] { get; set; }
 
