@@ -217,6 +217,22 @@ namespace System.Collections.Dimensions.Tests.TwoDimensions
             array.ToArray().Should().BeEquivalentTo(_defaultStringIntersections);
         }
 
+        [Trait("Member", "Enumerator")]
+        [Trait("Method", nameof(Matrix2d<object>.GetEnumerator))]
+        [Fact]
+        public void Enumerator_Throws_IfMatrixModified()
+        {
+            var matrix = DefaultNotEmptyStringMatrix();
+
+            var enumerator = matrix.GetEnumerator();
+            enumerator.MoveNext();
+            matrix[1, 1] = "throw";
+
+            enumerator.Invoking(e => e.MoveNext())
+                      .Should().Throw<InvalidOperationException>()
+                               .WithMessage("*Collection was modified*");
+        }
+
         #endregion Enumerations
     }
 }

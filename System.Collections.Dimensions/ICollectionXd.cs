@@ -13,7 +13,7 @@ namespace System.Collections.Dimensions
     {
         int Count { get; }
         IIndexXd Counts { get; }
-        int Dimensions { get; }
+        int Rank { get; }
         bool IsReadOnly { get; }
         bool IsSynchronized { get; }
         object SyncRoot { get; }

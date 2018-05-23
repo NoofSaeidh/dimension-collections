@@ -223,7 +223,6 @@ namespace System.Collections.Dimensions.TwoDimensions
             }
         }
 
-        public int Dimensions => 2;
 
         public bool IsFixedSize => false;
 
@@ -239,6 +238,8 @@ namespace System.Collections.Dimensions.TwoDimensions
         bool ICollectionXd<T>.IsReadOnly => false;
 
         bool ICollectionXd<T>.IsSynchronized => false;
+
+        public int Rank => Index2d.Rank2d;
 
         object ICollectionXd<T>.SyncRoot
         {
