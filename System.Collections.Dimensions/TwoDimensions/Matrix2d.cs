@@ -13,6 +13,14 @@ namespace System.Collections.Dimensions.TwoDimensions
     [Serializable]
     public class Matrix2d<T> : IMatrix2d<T>, IReadOnlyMatrix2d<T>, IReadOnlyMatrixXd<T>
     {
+        internal enum InsertionAction
+        {
+            No,
+            Throw,
+            EnlargeInput,
+            EnlargeDimension,
+        }
+
         // from mscorlib Array
         internal const int MaxArrayLength = 0X7FEFFFFF;
 
@@ -76,13 +84,7 @@ namespace System.Collections.Dimensions.TwoDimensions
             CopyArrayToItems(array);
         }
 
-        // throw, skip or add default if new collection that added
-        // has less values that curretn dimension
-        public DimensionChangeBehavior AddingFewerItemsBehavior { get; set; }
-
-        // the same but extend all other values (if FillDefault specified)
-        // if new value has more values
-        public DimensionChangeBehavior AddingLargerItemsBehavior { get; set; }
+        public DimensionSizeMismatchActions DimensionSizeMismatchActions { get; set; }
 
         public Index2d Capacities
         {
@@ -222,7 +224,6 @@ namespace System.Collections.Dimensions.TwoDimensions
                 _countTotal = _countX * _countY;
             }
         }
-
 
         public bool IsFixedSize => false;
 
@@ -483,53 +484,31 @@ namespace System.Collections.Dimensions.TwoDimensions
         }
 
         // value for input, size for _sizeX or _sizeY
-        private SizeAction CheckSizes(int value, int size)
+        private InsertionAction CheckSizes(int value, int size)
         {
             if (value < size)
             {
-                switch (AddingFewerItemsBehavior)
-                {
-                    case DimensionChangeBehavior.Throw:
-                        return SizeAction.Throw;
-
-                    case DimensionChangeBehavior.Ignore:
-                        return SizeAction.Return;
-
-                    case DimensionChangeBehavior.FillDefaults:
-                        return SizeAction.ExtendInput;
-
-                    default:
-                        throw new NotImplementedException();
-                }
+                if (DimensionSizeMismatchActions.HasFlag(DimensionSizeMismatchActions.EnlargeInput))
+                    return InsertionAction.EnlargeInput;
+                return InsertionAction.Throw;
             }
 
             if (value > size)
             {
-                switch (AddingFewerItemsBehavior)
-                {
-                    case DimensionChangeBehavior.Throw:
-                        return SizeAction.Throw;
-
-                    case DimensionChangeBehavior.Ignore:
-                        return SizeAction.Return;
-
-                    case DimensionChangeBehavior.FillDefaults:
-                        return SizeAction.ExtendItems;
-
-                    default:
-                        throw new NotImplementedException();
-                }
+                if (DimensionSizeMismatchActions.HasFlag(DimensionSizeMismatchActions.EnlargeDimension))
+                    return InsertionAction.EnlargeDimension;
+                return InsertionAction.Throw;
             }
 
-            return SizeAction.Nothing;
+            return InsertionAction.No;
         }
 
-        private SizeAction CheckSizeX(int value)
+        private InsertionAction CheckSizeX(int value)
         {
             return CheckSizes(value, _countX);
         }
 
-        private SizeAction CheckSizeY(int value)
+        private InsertionAction CheckSizeY(int value)
         {
             return CheckSizes(value, _countY);
         }
@@ -606,40 +585,29 @@ namespace System.Collections.Dimensions.TwoDimensions
             var action = CheckSizes(list.Count, size);
             switch (action)
             {
-                case SizeAction.Nothing:
+                case InsertionAction.No:
                     newSize = size;
                     return list;
 
-                case SizeAction.Throw:
+                case InsertionAction.Throw:
                     throw new ArgumentException();
 
-                case SizeAction.ExtendItems:
+                case InsertionAction.EnlargeInput:
                     newSize = list.Count;
                     return list;
 
-                case SizeAction.ExtendInput:
+                case InsertionAction.EnlargeDimension:
                     newSize = size;
                     return list.Union(Enumerable.Repeat(default(T), size - list.Count)).ToArray();
 
-                case SizeAction.Return:
                 default:
-                    newSize = size;
-                    return null;
+                    throw new NotImplementedException();
             }
         }
 
         private T[] InputAsArray(IEnumerable<T> items) => items is T[] a ? a : items.ToArray();
 
         private IList<T> InputAsList(IEnumerable<T> items) => items is IList<T> l ? l : items.ToArray();
-
-        private enum SizeAction
-        {
-            Nothing,
-            Return,
-            Throw,
-            ExtendItems,
-            ExtendInput
-        }
 
         /* todo: return interfaces and write custom linq */
         /*

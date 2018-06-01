@@ -9,16 +9,11 @@ using System.Threading.Tasks;
 
 namespace System.Collections.Dimensions
 {
-    public enum DimensionChangeBehavior
+    [Flags]
+    public enum DimensionSizeMismatchActions
     {
-        // throw exception if adding value has more (or less)
-        // values in any dimension
-        Throw,
-
-        // ignore such values (doesn't add it)
-        Ignore,
-
-        // fill missing member with default values
-        FillDefaults
+        Throw = 0b00,
+        EnlargeInput = 0b01,
+        EnlargeDimension = 0b10,
     }
 }
