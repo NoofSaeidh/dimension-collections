@@ -81,7 +81,16 @@ namespace System.Collections.Dimensions.TwoDimensions
             _items = new T[counts.X, counts.Y];
             _countX = _capacityX = counts.X;
             _countY = _capacityY = counts.Y;
-            CopyArrayToItems(array);
+            ArrayExtended.CopySingleToTwoDimensionArray(array, _items);
+        }
+
+        public Matrix2d(T[,] array)
+        {
+            _countX = _capacityX = array.GetLength(0);
+            _countY = _capacityY = array.GetLength(1);
+            _countTotal = array.Length;
+            _items = new T[_capacityX, _capacityY];
+            Array.Copy(array, _items, array.Length);
         }
 
         public DimensionSizeMismatchActions DimensionSizeMismatchActions { get; set; }
@@ -511,18 +520,6 @@ namespace System.Collections.Dimensions.TwoDimensions
         private InsertionAction CheckSizeY(int value)
         {
             return CheckSizes(value, _countY);
-        }
-
-        private void CopyArrayToItems(T[] input)
-        {
-            // hack to copy multidim array
-            for (int i = 0, k = 0; i < _countX; i++)
-            {
-                for (int j = 0; j < _countY; j++, k++)
-                {
-                    _items[i, j] = input[k];
-                }
-            }
         }
 
         private void EnsureCapacities(Index2d min)
